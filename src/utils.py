@@ -8,20 +8,26 @@ def get_psnr(img1, img2):
     return tf.image.psnr(img1, img2, max_val=255).numpy()
 
 
-def get_checkpoints(models, optimizers, checkpoint_dir='./training_checkpoints'):
-    generator, discriminator = models
-    gen_opt, disc_opt = optimizers
-    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+def get_checkpoint_pretrain(model, optimizer, checkpoint_dir='./pretrain_checkpoints/'):
     checkpoint = tf.train.Checkpoint(
-        generator=generator,
-        discriminator=discriminator,
-        gen_opt=gen_opt, disc_opt=disc_opt
+        step=tf.Variable(0, name='step'),
+        optimizer=optimizer, model=model
     )
     checkpoint_manager = tf.train.CheckpointManager(
         checkpoint=checkpoint,
         directory=checkpoint_dir,
-        max_to_keep=5
+        max_to_keep=3
     )
+    if checkpoint_manager.latest_checkpoint:
+        checkpoint.restore(checkpoint_manager.latest_checkpoint)
+        print(
+            'Loaded ckpt from {} at step {}.'.format(
+                checkpoint_manager.latest_checkpoint,
+                checkpoint.step.numpy()
+            )
+        )
+    else:
+        print("Training from scratch....")
     return checkpoint, checkpoint_manager
 
 

@@ -1,0 +1,48 @@
+{
+    "hr_img_path": "../DIV2K_train_HR/*",
+    "hr_patch_size": 256,
+    "downsample_scale": 4,
+    "batch_size": 8,
+    "buffer_size": 128,
+    "n_channels": 3,
+    "models": {
+        "generator": {
+            "filters": 64,
+            "n_res_blocks": 16
+        },
+        "discriminator": {
+            "filters": 32
+        }
+    },
+    "lr_schedulers": {
+        "generator": {
+            "initial_lr": 1e-4,
+            "decay_steps": 100000,
+            "decay_rate": 0.1
+        },
+        "discriminator": {
+            "initial_lr": 5e-4,
+            "decay_steps": 100000,
+            "decay_rate": 0.1
+        }
+    },
+    "optimizers": {
+        "generator": {
+            "beta_1": 0.9,
+            "beta_2": 0.999,
+            "epsilon": 1e-07
+        },
+        "discriminator": {
+            "beta_1": 0.9,
+            "beta_2": 0.999,
+            "epsilon": 1e-07
+        }
+    },
+    "pretrain_checkpoint_dir": "./pretraining_checkpoints/exp1/",
+    "pretrain_logdir": "logs/exp1/pretrain",
+    "pretrain_epochs": 1,
+    "train_logdir": "logs/exp1/train",
+    "train_epochs": 50,
+    "save_interval": 5,
+    "train_checkpoint_dir": "./training_checkpoints/exp1/"
+}
