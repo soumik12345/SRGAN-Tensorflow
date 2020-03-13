@@ -21,7 +21,7 @@ class Trainer:
         self.g_optimizer = tf.keras.optimizers.Adam(learning_rate=self.g_schedule)
         self.d_optimizer = tf.keras.optimizers.Adam(learning_rate=self.d_schedule)
         patch = int(self.config['hr_patch_size'] / 2 ** self.config['downsample_scale'])
-        disc_patch = (patch, patch, 1)
+        self.disc_patch = (patch, patch, 1)
 
     def get_dataset(self):
         super_resolution_dataset = SRDataset(
@@ -103,7 +103,7 @@ class Trainer:
             fake_hr = self.generator(x)
             valid_prediction = self.discriminator(y)
             fake_prediction = self.discriminator(fake_hr)
-            c_loss = content_loss(y, fake_hr)
+            c_loss = content_loss(y, fake_hr, self.vgg)
             adv_loss = 1e-3 * tf.keras.losses.BinaryCrossentropy()(valid, fake_prediction)
             mse_loss = tf.keras.losses.MeanSquaredError()(y, fake_hr)
             perceptual_loss = c_loss + adv_loss + mse_loss
@@ -137,7 +137,7 @@ class Trainer:
                         psnr_batch.append(get_psnr(denorm_y[i], denorm_pred[i]))
                     psnr = sum(psnr_batch) / self.config['batch_size']
                     tf.summary.scalar('train/adversarial_loss', adv_loss, step=iterations)
-                    tf.summary.scalar('train/content_loss', content_loss, step=iterations)
+                    tf.summary.scalar('train/content_loss', c_loss, step=iterations)
                     tf.summary.scalar('train/mse_loss', mse_loss, step=iterations)
                     tf.summary.scalar('train/discriminator_loss', disc_loss, step=iterations)
                     tf.summary.scalar(
